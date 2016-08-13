@@ -12,7 +12,15 @@ var BUILD_PATH = path.resolve(ROOT_PATH, 'build');
 var staticLink = ''
 
 module.exports = {
-    entry: APP_PATH,
+	/**
+	As the name mentions, entry point are list of files that webpack will process and bundle the dependencies.
+	Multiple entry points can be used for separating files (chunking) and only load that is needed.
+	Chunking can be used in conjunction with HtmlWebpackPlugin to create entry html endpoints with their respective dependencies
+	*/
+    entry: {
+		app: APP_PATH,
+		vendor: ["jquery", "underscore"]
+	},
     output: {
 		/** 
 		Paths:
@@ -41,11 +49,13 @@ module.exports = {
 	plugins: [ 
 		  /**
 		  Plugins process files after loaders. 
+		  CommonsChunkPlugin: Separate out common chunks from the main script. For e.g. vendor is extracted into its own file instead of bundling it with bundle.js
 		  ExtractTextPlugin: Processes all css'es into one file
 		  HtmlWebpackPlugin: Processes HTML files (mostly index.html) and updates thier assets url (from the above).
 							 If you have multiple index files sharing code, then just add another entry.
 							 But it is advised to instead use multi-webpack configs. --> https://github.com/webpack/webpack/tree/master/examples/multi-compiler
 		  */
+		  new webpack.optimize.CommonsChunkPlugin({name: "vendor", filename: "vendor.js", minChunks: Infinity}),
 	      new ExtractTextPlugin( "bundle.css" ),
 		  new HtmlWebpackPlugin({template: 'app/index.html', hash: true}),
 		  new HtmlWebpackPlugin({template: 'app/index_two.html', hash: true, filename: "index_two.html", favicon: "app/images/favicon.ico"})
