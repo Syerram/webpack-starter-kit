@@ -2,10 +2,9 @@ var path = require('path');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 var webpack = require('webpack');
 var ExtractTextPlugin = require("extract-text-webpack-plugin");
-var HtmlWebpackPlugin = require('html-webpack-plugin');
 
 var ROOT_PATH = path.resolve(__dirname);
-var APP_PATH = path.resolve(ROOT_PATH, 'app') + "/js/index.js";
+var APP_PATH = path.resolve(ROOT_PATH, 'app')
 var BUILD_PATH = path.resolve(ROOT_PATH, 'build');
 
 //Setup staticlink with If condition. Leave blank for local. Notice the ending `/` url. Its important
@@ -13,12 +12,15 @@ var staticLink = ''
 
 module.exports = {
 	/**
-	As the name mentions, entry point are list of files that webpack will process and bundle the dependencies.
+	As the name mentions, entry point is list of files that webpack will process and bundle the dependencies.
+	Each entry will produce a bundled JS with the name of the key. e.g. index: 'app/js/random.js` will produce `index.js` as bundled file.
+	See `filename` property below, which should be set to `[name].js`
 	Multiple entry points can be used for separating files (chunking) and only load that is needed.
 	Chunking can be used in conjunction with HtmlWebpackPlugin to create entry html endpoints with their respective dependencies
 	*/
     entry: {
-		app: APP_PATH,
+		index: APP_PATH + "/js/index.js",
+		index_two: APP_PATH + "/js/index_two.js",
 		vendor: ["jquery", "underscore"]
 	},
     output: {
@@ -29,7 +31,7 @@ module.exports = {
 		publicPath: This is the static link to the CDN or in case of local "". Webpack will replace "../images/image.png" with "http://cdn.com/image.png"
 		*/
         path: BUILD_PATH,
-        filename: 'bundle.js',
+        filename: '[name].js',
         publicPath: staticLink
     },
     module: {
@@ -53,11 +55,14 @@ module.exports = {
 		  ExtractTextPlugin: Processes all css'es into one file
 		  HtmlWebpackPlugin: Processes HTML files (mostly index.html) and updates thier assets url (from the above).
 							 If you have multiple index files sharing code, then just add another entry.
-							 But it is advised to instead use multi-webpack configs. --> https://github.com/webpack/webpack/tree/master/examples/multi-compiler
+							 Handling direct relationships. Often times you might have multiple index files depending on specific JS bundles. 
+							 In such cases, you can specify the chunk names as dependencies. In this example, `index.html` depends only on `index.js`, and `index_two.html` depends on `index_two.js`,
+							 the `chunks` paramter is list that takes the `vendor` (common to both index files) and their respective dependency.
 		  */
 		  new webpack.optimize.CommonsChunkPlugin({name: "vendor", filename: "vendor.js", minChunks: Infinity}),
-	      new ExtractTextPlugin( "bundle.css" ),
-		  new HtmlWebpackPlugin({template: 'app/index.html', hash: true}),
-		  new HtmlWebpackPlugin({template: 'app/index_two.html', hash: true, filename: "index_two.html", favicon: "app/images/favicon.ico"})
+	      new ExtractTextPlugin( "main.css" ),
+		  //Eg : Shows we are using two different templates with chunks pointing to their respective dependencies
+		  new HtmlWebpackPlugin({template: 'app/index.html', hash: true, chunks: ['vendor', 'index']}), 
+		  new HtmlWebpackPlugin({template: 'app/index_two.html', hash: true, filename: "index_two.html", chunks: ['vendor', 'index_two'], favicon: "app/images/favicon.ico"})
 	]
 }

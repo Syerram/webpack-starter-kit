@@ -1,6 +1,8 @@
 # Bare minimum example of using webpack
 
-A quick example of using webpack for setting up JS/CSS and associated assets like images/fonts etc. It also shows how to setup CDN.
+A quick example of using [webpack](http://webpack.github.io/) for setting up JS/CSS and associated assets like images/fonts etc. You can use this as a starter kit or as a reference.
+It assumes you have general awareness of webpack and its purpose.
+
 **Comments are welcome.**
 
 ## How to
@@ -25,7 +27,7 @@ app
 Running webpack will create a `build` folder.
 
 ### Build structure
-Build structure will **NOT** have the folder structure as `app`. In fact it will have all files at its root. e.g.
+Build structure will **NOT** have the same folder structure as `app`. In fact it will have all files at its root. e.g.
 ```
 build
 	|-- image1.png
@@ -35,6 +37,7 @@ build
 		bundle.css
 		bundle.js
 		index.html
+		index_N.html
 		font1.__
 ````
 
@@ -63,26 +66,14 @@ img.src = require('../images/logo.png');
 ```
 
 #### Index html
-**Webpack will not handle these files. You would need the gulp task to replace the SRC**
+Index html (or endpoint HTMLs) can be managed by Webpack as well. [html-webpack-plugin](https://github.com/ampedandwired/html-webpack-plugin) is a very popular plugin that manages assets for HTML. Few rules to follow,
 
-* Include the webpacked files, namely `bundle.css`, `bundle.js` in `index.html` e.g.
-```
-<link rel="stylesheet" href="bundle.css" media="all"/>	
-....
-<script src="bundle.js"></script>
-```
-**DO NOT PUT FRONT SLASH, like `/bundle.js`** for webpack bundles
+* Do not include the css or js bundles. Webpack will inject it correctly (i.e. CSS in head and JS at the end of body)
+* For images, use relative path i.e. `./images/<image.png>`
+* For multiple index files, repeat the html-webpack plugin. See the example in `webpack.config.js`
+* You can add multiple entry points targeted for multiple index files. For e.g. `index_1.html` depends only on `index_1.js`, `index_2.html` on `index_2.js` and so on. See the example in `webpack.config.js`
 
-##### How-to replace
-Since the names of the bundled webpack are known, simply do a direct replace via `sed` or if using `gulp`
-
-```
-.pipe(replace('src="bundle.js', static_link + "/bundle.js"))
-.pipe(replace('src="bundle.css', static_link + "/bundle.css"))
-```
-
-* **Working on a better way to handle this.** There is a workaround to have the HTML as an entry point but its not straight forward. So meanwhile follow this pattern. 
-* Also, there is no rule on what you want to name the bundles. We name them `main.js`, `scripts.js`. Feel free to do so, just make sure they match
+**DO NOT PROCESS YOUR HTML BY GULP**, unless there is very specific case to do so.
 
 #### CDN Setup
 Webpack property `publicPath` when set, will prefix all asset links with the CDN URL
@@ -109,13 +100,16 @@ module.exports = {
 ```
 When loaded in the browser, all assets packed by webpack will have the prefix url e.g.
 ```
-<img src="../images/something.png"> will be replaced with
-
-# notice that webpack replaced directly to the root of the URL
-<img src="http:/some-cdn.com/theme-name/assets/something.png"> 
-
+<img src="../images/something.png"> # will replaced with --
+														  |
+														  v
+<img src="http:/some-cdn.com/<theme>/something.png"> # notice that webpack replaced directly to the root of the URL
 ```
+You can then upload the entire `build` as is to `http:/some-cdn.com/<theme>/`
 
+####Closing remarks
+The code example does not cover advanced features like code splitting, optimizations, custom plugins. Please visit [webpack docs](http://webpack.github.io/docs/).
+Feel free to send a pull-request or watch for repo updates.
 
 
 
