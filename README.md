@@ -107,6 +107,14 @@ When loaded in the browser, all assets packed by webpack will have the prefix ur
 ```
 You can then upload the entire `build` as is to `http:/some-cdn.com/<theme>/`
 
+### Create the build
+
+To kick off Webpack simply:
+
+```
+npm run build
+```
+
 ####Closing remarks
 The code example does not cover advanced features like code splitting, optimizations, custom plugins. Please visit [webpack docs](http://webpack.github.io/docs/).
 Feel free to send a pull-request or watch for repo updates.
